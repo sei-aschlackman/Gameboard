@@ -11,15 +11,18 @@ namespace Gameboard.Api.Services
     public class ReportService : _Service
     {
         GameboardDbContext Store { get; }
+        ChallengeService _challengeService { get; }
 
         public ReportService (
             ILogger<ReportService> logger,
             IMapper mapper,
             CoreOptions options,
-            GameboardDbContext store
+            GameboardDbContext store,
+            ChallengeService challengeService
         ): base (logger, mapper, options)
         {
             Store = store;
+            _challengeService = challengeService;
         }
 
         internal Task<UserReport> GetUserStats()
@@ -74,26 +77,37 @@ namespace Gameboard.Api.Services
                 throw new ArgumentNullException("Invalid game id");
             }
 
-            var games = Store.Games.Where(g => gameId == g.Id).Select(g => new
+            var game = Store.Games.Where(g => g.Id == gameId).Select(g => new { g.Id, g.Name }).FirstOrDefault();
+
+            if (game == null)
             {
-                g.Id,
-                g.Name
-            }).ToDictionary(pair => pair.Id, pair => pair.Name);
-            
-            var sp = (from sponsors in Store.Sponsors
-                        join p in Store.Players on
-                        sponsors.Logo equals p.Sponsor
-                        join game in Store.Games on
-                        p.GameId equals game.Id
-                        where p.GameId == gameId
-                        select new { sponsors.Id, sponsors.Name, sponsors.Logo }).GroupBy(s => new { s.Id, s.Name, s.Logo })
-                        .Select(g => new SponsorStat { Id = g.Key.Id, Name = g.Key.Name, Logo = g.Key.Logo, Count = g.Count() }).OrderByDescending(g => g.Count).ThenBy(g => g.Name);
+                throw new Exception("Invalid game");
+            }
+
+            var players = Store.Players.Where(p => p.GameId == gameId)
+                .Select(p => new { p.Sponsor, p.TeamId }).ToList();
+
+            var sponsors = Store.Sponsors;
+
+            List<SponsorStat> sponsorStats = new List<SponsorStat>();
+
+            foreach (Data.Sponsor sponsor in sponsors)
+            {
+                sponsorStats.Add(new SponsorStat
+                {
+                    Id = sponsor.Id,
+                    Name = sponsor.Name,
+                    Logo = sponsor.Logo,
+                    Count = players.Where(p => p.Sponsor == sponsor.Logo).Count(),
+                    TeamCount = players.Where(p => p.Sponsor == sponsor.Logo).Select(p => p.TeamId).Distinct().Count()
+                });
+            }
 
             GameSponsorStat gameSponsorStat = new GameSponsorStat
             {
                 GameId = gameId,
-                GameName = games[gameId],
-                Stats = (SponsorStat[])sp.ToArray()
+                GameName = game.Name,
+                Stats = sponsorStats.ToArray()
             };
 
             gameSponsorStats.Add(gameSponsorStat);
@@ -105,6 +119,57 @@ namespace Gameboard.Api.Services
             };
 
             return Task.FromResult(sponsorReport);
+        }
+
+        internal Task<ChallengeReport> GetChallengeStats(string gameId)
+        {
+            if (string.IsNullOrWhiteSpace(gameId))
+            {
+                throw new ArgumentNullException("Invalid game id");
+            }
+
+            var game = Store.Games.Where(g => g.Id == gameId).Select(g => new { g.Id, g.Name }).FirstOrDefault();
+
+            if (game == null)
+            {
+                throw new Exception("Invalid game");
+            }
+
+            List<ChallengeStat> challengeStats = new List<ChallengeStat>();
+            var challengeSpecs = Store.ChallengeSpecs.Where(c => c.GameId == gameId).OrderBy(c => c.Name).ToList();
+            var challenges = _challengeService.GetByGame(gameId).Result;
+
+            foreach (Data.ChallengeSpec challengeSpec in challengeSpecs)
+            {
+                TimeSpan ts = new TimeSpan();
+                var cs = challenges.Where(c => c.SpecId == challengeSpec.Id).ToList();
+
+                foreach (Challenge challenge in cs)
+                {
+                    ts += (challenge.EndTime - challenge.StartTime);
+                }
+
+                challengeStats.Add(new ChallengeStat
+                {
+                    Id = challengeSpec.Id,
+                    Name = challengeSpec.Name,
+                    Tag = challengeSpec.Tag,
+                    Points = challengeSpec.Points,
+                    SuccessCount = challenges.Where(c => c.SpecId == challengeSpec.Id).Select(c => c.State.Challenge).Where(c => c.Score == c.MaxPoints).Count(),
+                    PartialCount = challenges.Where(c => c.SpecId == challengeSpec.Id).Select(c => c.State.Challenge).Where(c => c.Score > 0 && c.Score < c.MaxPoints).Count(),
+                    FailureCount = challenges.Where(c => c.SpecId == challengeSpec.Id).Select(c => c.State.Challenge).Where(c => c.MaxAttempts == c.Attempts && c.Score == 0).Count(),
+                    AverageTime = ts.ToString(@"hh\:mm\:ss"),
+                    AttemptCount = challenges.Where(c => c.SpecId == challengeSpec.Id).Count()
+                });
+            }
+
+            ChallengeReport challengeReport = new ChallengeReport
+            {
+                Timestamp = DateTime.UtcNow,
+                Stats = challengeStats.ToArray()
+            };
+
+            return Task.FromResult(challengeReport);
         }
     }
 }
