@@ -299,13 +299,13 @@ namespace Gameboard.Api.Controllers
 
             if (isTeamMember)
                 ActorMap.Update(
-                    await ChallengeService.SetConsoleActor(model, Actor.Id, Actor.Name)
+                    await ChallengeService.SetConsoleActor(model, Actor.Id, Actor.ApprovedName)
                 );
         }
 
         [HttpGet("/api/challenge/consoles")]
         [Authorize]
-        public ConsoleActor[] FindConsoles(string gid)
+        public ConsoleActor[] FindConsoles([FromQuery]string gid)
         {
             AuthorizeAny(
               () => Actor.IsDirector,
