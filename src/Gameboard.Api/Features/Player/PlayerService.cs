@@ -518,6 +518,9 @@ namespace Gameboard.Api.Services
         {
             var game = await GameStore.Retrieve(model.NextGameId);
 
+            if (game.SessionMinutes == 0)
+                throw new GameNotInitialized();
+
             var allteams = await Store.List()
                 .Where(p => p.GameId == model.GameId)
                 .ToArrayAsync()
@@ -546,6 +549,7 @@ namespace Gameboard.Api.Services
                         Name = player.Name,
                         Sponsor = player.Sponsor,
                         Role = player.Role,
+                        SessionMinutes = game.SessionMinutes
                     });
                 }
             }
