@@ -240,9 +240,6 @@ namespace Gameboard.Api.Services
         {
             var team = await Store.ListTeam(model.TeamId);
 
-            if (team.First().IsLive.Equals(false))
-                throw new SessionNotActive();
-
             if (team.First().SessionEnd >= model.SessionEnd)
                 throw new InvalidSessionWindow();
 
