@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
+    <PackageReference Include="Alloy.Api.Client" Version="1.1.1" />
     <PackageReference Include="AutoMapper" Version="9.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0" />
@@ -19,6 +20,7 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.1" />
     <PackageReference Include="TopoMojo.Api.Client" Version="2.0.6" />
     <PackageReference Include="YamlDotNet" Version="11.1.1" />
+    <PackageReference Include="IdentityModel" Version="3.10.10" />
   </ItemGroup>
 
   <PropertyGroup>

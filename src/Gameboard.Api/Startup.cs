@@ -14,6 +14,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Extensions.Http;
 using ServiceStack.Text;
@@ -103,6 +104,7 @@ namespace Gameboard.Api
 
             services
                 .AddSingleton<CoreOptions>(_ => Settings.Core)
+                .AddSingleton<CrucibleOptions>(_ => Settings.Crucible)
                 .AddSingleton<INameService, NameService>()
                 .AddGameboardData(Settings.Database.Provider, Settings.Database.ConnectionString)
                 .AddGameboardServices()
@@ -112,15 +114,17 @@ namespace Gameboard.Api
             ;
 
             services.AddSingleton<AutoMapper.IMapper>(
-                new AutoMapper.MapperConfiguration(cfg => {
+                new AutoMapper.MapperConfiguration(cfg =>
+                {
                     cfg.AddGameboardMaps();
                 }).CreateMapper()
             );
 
+            services.AddSingleton<IAuthenticationService, AuthenticationService>();
+
             // Configure Auth
             services.AddConfiguredAuthentication(Settings.Oidc);
             services.AddConfiguredAuthorization();
-
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

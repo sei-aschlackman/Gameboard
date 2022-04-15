@@ -17,7 +17,7 @@ namespace Gameboard.Api
         public HeaderOptions Headers { get; set; } = new HeaderOptions();
         public OpenApiOptions OpenApi { get; set; } = new OpenApiOptions();
         public Defaults Defaults { get; set; } = new Defaults();
-
+        public CrucibleOptions Crucible { get; set; } = new CrucibleOptions();
     }
 
     public class OidcOptions
@@ -97,9 +97,9 @@ namespace Gameboard.Api
     public class CorsPolicyOptions
     {
         public string Name { get; set; } = "default";
-        public string[] Origins { get; set; } = new string[]{};
-        public string[] Methods { get; set; } = new string[]{};
-        public string[] Headers { get; set; } = new string[]{};
+        public string[] Origins { get; set; } = new string[] { };
+        public string[] Methods { get; set; } = new string[] { };
+        public string[] Headers { get; set; } = new string[] { };
         public bool AllowCredentials { get; set; }
 
         public CorsPolicy Build()
@@ -107,18 +107,21 @@ namespace Gameboard.Api
             CorsPolicyBuilder policy = new CorsPolicyBuilder();
 
             var origins = Origins.Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
-            if (origins.Any()) {
+            if (origins.Any())
+            {
                 if (origins.First() == "*") policy.AllowAnyOrigin(); else policy.WithOrigins(origins);
                 if (AllowCredentials && origins.First() != "*") policy.AllowCredentials(); else policy.DisallowCredentials();
             }
 
             var methods = Methods.Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
-            if (methods.Any()) {
+            if (methods.Any())
+            {
                 if (methods.First() == "*") policy.AllowAnyMethod(); else policy.WithMethods(methods);
             }
 
             var headers = Headers.Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
-            if (headers.Any()) {
+            if (headers.Any())
+            {
                 if (headers.First() == "*") policy.AllowAnyHeader(); else policy.WithHeaders(headers);
             }
 
@@ -134,6 +137,7 @@ namespace Gameboard.Api
         public string GameEngineClientName { get; set; }
         public string GameEngineClientSecret { get; set; }
         public int GameEngineMaxRetries { get; set; } = 2;
+        public bool MojoEnabled { get; set; } = true;
         public string ImageFolder { get; set; } = "wwwroot/img";
         public string DocFolder { get; set; } = "wwwroot/doc";
         public string SupportUploadsRequestPath { get; set; } = "supportfiles";
@@ -151,4 +155,14 @@ namespace Gameboard.Api
         public string CertificateTemplate { get; set; } = "";
     }
 
+    public class CrucibleOptions
+    {
+        public string ApiUrl { get; set; } = "http://localhost:4402/api";
+        public string TokenUrl { get; set; } = "http://localhost:5000/connect/token";
+        public string ClientId { get; set; } = "";
+        public string Scope { get; set; } = "";
+        public string UserName { get; set; } = "";
+        public string Password { get; set; } = "";
+        public bool Enabled { get; set; } = false;
+    }
 }

@@ -9,24 +9,26 @@ using Microsoft.EntityFrameworkCore;
 using Gameboard.Api.Data.Abstractions;
 using Microsoft.Extensions.Logging;
 using TopoMojo.Api.Client;
+using Alloy.Api.Client;
+using System.Collections.Generic;
 
 namespace Gameboard.Api.Services
 {
-    public class ChallengeSpecService: _Service
+    public class ChallengeSpecService : _Service
     {
         IChallengeSpecStore Store { get; }
-        ITopoMojoApiClient Mojo { get; }
+        GameEngineService GameEngine { get; }
 
-        public ChallengeSpecService (
+        public ChallengeSpecService(
             ILogger<ChallengeSpecService> logger,
             IMapper mapper,
             CoreOptions options,
             IChallengeSpecStore store,
-            ITopoMojoApiClient mojo
-        ): base(logger, mapper, options)
+            GameEngineService gameEngine
+        ) : base(logger, mapper, options)
         {
             Store = store;
-            Mojo = mojo;
+            GameEngine = gameEngine;
         }
 
         public async Task<ChallengeSpec> AddOrUpdate(NewChallengeSpec model)
@@ -71,16 +73,7 @@ namespace Gameboard.Api.Services
 
         public async Task<ExternalSpec[]> List(SearchFilter model)
         {
-
-            var results = await Mojo.ListWorkspacesAsync(
-                "", "", null, null,
-                model.Term, model.Skip, model.Take, model.Sort,
-                model.Filter
-            );
-
-            return Mapper.Map<ExternalSpec[]>(
-                results
-            );
+            return await GameEngine.ListSpecs(model);
         }
 
         public async Task Sync(string id)
@@ -89,7 +82,7 @@ namespace Gameboard.Api.Services
                 .ToDictionary(o => o.ExternalId)
             ;
 
-            foreach(var spec in Store.DbSet.Where(s => s.GameId == id))
+            foreach (var spec in Store.DbSet.Where(s => s.GameId == id))
             {
                 if (externals.ContainsKey(spec.ExternalId).Equals(false))
                     continue;

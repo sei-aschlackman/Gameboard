@@ -9,14 +9,14 @@ namespace Gameboard.Api
     [Flags]
     public enum UserRole
     {
-        Member =    0,
-        Observer =  0b1,
-        Tester =    0b10,
-        Designer =  0b100,
+        Member = 0,
+        Observer = 0b1,
+        Tester = 0b10,
+        Designer = 0b100,
         Registrar = 0b1000,
-        Director =  0b10000,
-        Admin =     0b100000,
-        Support =   0b1000000
+        Director = 0b10000,
+        Admin = 0b100000,
+        Support = 0b1000000
     }
 
     public enum PlayerRole
@@ -54,4 +54,9 @@ namespace Gameboard.Api
         AssigneeChange
     }
 
+    public enum GameEngineType
+    {
+        TopoMojo,
+        Crucible
+    }
 }

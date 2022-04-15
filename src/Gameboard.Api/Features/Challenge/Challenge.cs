@@ -2,7 +2,6 @@
 // Released under a MIT (SEI)-style license. See LICENSE.md in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using TopoMojo.Api.Client;
 
 namespace Gameboard.Api
@@ -96,7 +95,7 @@ namespace Gameboard.Api
         public string Name { get; set; }
         public string Tag { get; set; }
         public string PlayerId { get; set; }
-        public string PlayerName { get; set; } 
+        public string PlayerName { get; set; }
         public long Duration { get; set; }
         public int ChallengeScore { get; set; }
         public int GameScore { get; set; }
@@ -107,36 +106,36 @@ namespace Gameboard.Api
 
     public class ObserveVM
     {
-      public string Id { get; set; }
-      public string Name { get; set; }
-      public string ChallengeId { get; set; }
-      public bool IsRunning { get; set; }
-      public bool IsVisible { get; set; }
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string ChallengeId { get; set; }
+        public bool IsRunning { get; set; }
+        public bool IsVisible { get; set; }
     }
 
     public class ConsoleRequest
     {
-      public string Name { get; set; }
-      public string SessionId { get; set; }
-      public ConsoleAction Action { get; set; }
-      public string Id => $"{Name}#{SessionId}";
+        public string Name { get; set; }
+        public string SessionId { get; set; }
+        public ConsoleAction Action { get; set; }
+        public string Id => $"{Name}#{SessionId}";
     }
 
     public class ConsoleSummary
     {
-      public string Id { get; set; }
-      public string Name { get; set; }
-      public string SessionId { get; set; }
-      public string Url { get; set; }
-      public bool IsRunning { get; set; }
-      public bool IsObserver { get; set; }
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string SessionId { get; set; }
+        public string Url { get; set; }
+        public bool IsRunning { get; set; }
+        public bool IsObserver { get; set; }
     }
 
     public enum ConsoleAction
     {
-      None,
-      Ticket,
-      Reset
+        None,
+        Ticket,
+        Reset
     }
 
     public class ChallengeEvent
@@ -186,7 +185,7 @@ namespace Gameboard.Api
         public SectionSubmission[] Submissions { get; set; }
     }
 
-    public class ChallengeSearchFilter: SearchFilter
+    public class ChallengeSearchFilter : SearchFilter
     {
         public string uid { get; set; } // Used to search for all challenges of a user
     }

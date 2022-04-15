@@ -28,14 +28,17 @@ namespace Gameboard.Api.Data
         public DateTimeOffset StartTime { get; set; }
         public DateTimeOffset EndTime { get; set; }
         public bool HasDeployedGamespace { get; set; }
-        [NotMapped] public ChallengeResult Result => Score == Points
+        public GameEngineType GameEngineType { get; set; }
+        [NotMapped]
+        public ChallengeResult Result => Score == Points
             ? ChallengeResult.Success
             : Score > 0
                 ? ChallengeResult.Partial
                 : ChallengeResult.None
         ;
-        [NotMapped] public long Duration => StartTime.NotEmpty() && LastScoreTime.NotEmpty()
-            ? (long) LastScoreTime.Subtract(StartTime).TotalMilliseconds
+        [NotMapped]
+        public long Duration => StartTime.NotEmpty() && LastScoreTime.NotEmpty()
+            ? (long)LastScoreTime.Subtract(StartTime).TotalMilliseconds
             : 0
         ;
 
